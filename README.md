@@ -23,6 +23,7 @@ Our platform automatically extracts decisions, action items, and sentiment from 
 ```bash
 git clone https://github.com/your-username/meeting-intelligence-system.git
 cd meeting-intelligence-system
+```
 
 ### 2. Create a virtual environment and install dependencies:
 python -m venv venv
