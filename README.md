@@ -32,7 +32,8 @@ Activate environment
 venv\Scripts\activate
 # on macOS/Linux
 source venv/bin/activate
-pip install -r requirements.txt
+
+**pip install -r requirements.txt**
 
 ### 3. Run the backend (FastAPI):
 uvicorn backend.main:app --reload
