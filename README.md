@@ -27,10 +27,10 @@ cd meeting-intelligence-system
 
 ### 2. Create a virtual environment and install dependencies:
 python -m venv venv
-# Activate environment
+** Activate environment**
 # Windows
 venv\Scripts\activate
-# macOS/Linux
+** macOS/Linux**
 source venv/bin/activate
 pip install -r requirements.txt
 
@@ -44,7 +44,7 @@ streamlit run frontend/app.py
 Frontend: http://localhost:8501
 Backend: http://localhost:8000
 
-Usage
+## Usage: 
 Upload meeting transcripts and optional audio.
 Click Extract Intelligence to analyze meetings.
 Browse the Dashboard:
