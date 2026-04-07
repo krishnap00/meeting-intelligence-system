@@ -27,10 +27,10 @@ cd meeting-intelligence-system
 
 ### 2. Create a virtual environment and install dependencies:
 python -m venv venv
-** Activate environment**
-# Windows
+Activate environment
+# on Windows
 venv\Scripts\activate
-** macOS/Linux**
+# on macOS/Linux
 source venv/bin/activate
 pip install -r requirements.txt
 
