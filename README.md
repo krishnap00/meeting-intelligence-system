@@ -24,3 +24,30 @@ Our platform automatically extracts decisions, action items, and sentiment from 
 git clone https://github.com/your-username/meeting-intelligence-system.git
 cd meeting-intelligence-system
 
+### 2. Create a virtual environment and install dependencies:
+python -m venv venv
+# Activate environment
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
+pip install -r requirements.txt
+
+### 3. Run the backend (FastAPI):
+uvicorn backend.main:app --reload
+
+### 4.Run the frontend (Streamlit):
+streamlit run frontend/app.py
+
+### 5.Open the app in your browser:
+Frontend: http://localhost:8501
+Backend: http://localhost:8000
+
+Usage
+Upload meeting transcripts and optional audio.
+Click Extract Intelligence to analyze meetings.
+Browse the Dashboard:
+View Summaries, Decisions, Action Items, Sentiment Charts, and Assistant answers.
+Use the search bar to filter meetings by keywords.
+Download action items as a CSV.
+Provide feedback via the Feedback section.
