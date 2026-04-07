@@ -32,3 +32,15 @@ def analyze(request: TranscriptRequest):
 def chat(request: ChatRequest):
     answer = chatbot_response(request.question, request.context)
     return {"answer": answer}
+
+from pydantic import BaseModel
+from models.processor import explain_decision
+
+class ExplainRequest(BaseModel):
+    decision: str
+    context: str
+
+@app.post("/explain")
+def explain(req: ExplainRequest):
+    result = explain_decision(req.decision, req.context)
+    return {"explanation": result}

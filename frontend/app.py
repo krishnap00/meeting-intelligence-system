@@ -34,41 +34,18 @@ if not st.session_state.get('connected'):
 
 # --- 4. THE "SAAS" VISUAL ENGINE (CSS) ---
 st.markdown("""
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; color: #F8F9FA; }
-        .stApp { background: radial-gradient(circle at top left, #1A1A2E, #0A0A0F); background-attachment: fixed; }
-        
-        /* Glassmorphism Sidebar */
-        [data-testid="stSidebar"] { background: rgba(10, 10, 15, 0.8) !important; backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-item { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 12px; margin-bottom: 10px; }
-
-        /* CLOUD UPLOAD ZONE STYLING */
-        [data-testid="stFileUploadDropzone"] {
-            background-color: #1A1A24 !important;
-            border: 2px dashed #6366F1 !important;
-            border-radius: 20px !important;
-            padding: 60px !important;
-            text-align: center !important;
-        }
-        [data-testid="stBaseButton-section"]::before {
-            content: url('https://img.icons8.com/ios-filled/50/6366F1/cloud-upload.png');
-            display: block; margin-bottom: 20px;
-        }
-        [data-testid="stBaseButton-section"]::after {
-            content: "Drop your transcript here";
-            font-size: 24px; font-weight: 700; color: white; display: block; margin-top: 10px;
-        }
-
-        /* Tables & Cards */
-        .custom-table-container { background: rgba(26, 26, 36, 0.4); backdrop-filter: blur(12px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; margin-top: 20px; }
-        .custom-table { width: 100%; border-collapse: collapse; }
-        .custom-table th { text-align: left; padding: 18px; color: #94A3B8; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .custom-table td { padding: 18px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        header { visibility: hidden; }
-        footer { visibility: hidden; }
+        html, body { font-family: 'Sora', sans-serif !important; color: #F8F9FA; }
+        .stApp {
+            background:
+                linear-gradient(rgba(10,10,15,0.85), rgba(10,10,15,0.95)),
+                url("https://images.unsplash.com/photo-1556761175-4b46a572b786");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }       
+        /* Keep your card, sidebar, tables, etc. styles here */
     </style>
 """, unsafe_allow_html=True)
 
@@ -96,8 +73,43 @@ if not st.session_state.all_meetings:
     st.markdown('<div style="margin-top: 50px;"></div>', unsafe_allow_html=True)
     uploaded_files = st.file_uploader("", type=["txt", "vtt"], accept_multiple_files=True)
     
+    # --- 🎙️ AUDIO UPLOAD ---
+    st.markdown("### 🎙 Upload Meeting Audio (Optional)")
+
+    audio_file = st.file_uploader("Upload meeting audio", type=["mp3", "wav"])
+
+    if audio_file:
+        st.info("🎧 Audio uploaded (transcription feature can be added)")
+
+    # --- HERO SECTION (ADVANCED) ---
+    # HERO SECTION
+    st.markdown("""
+    <div class="hero">
+        <div class="hero-bg" style="text-align:center;">
+            <h1 style="font-size: 48px; font-weight: 700; color: white;">
+                Turn Meetings into Actionable Intelligence
+            </h1>
+
+            <p style="font-size: 18px; color: #CBD5F5; margin-top: 10px;">
+                Extract decisions, action items, and insights — instantly.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # STREAMLIT BUTTONS BELOW HTML
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🚀 Get Started"):
+            st.info("Get Started clicked")
+    with col2:
+        if st.button("▶ Watch Demo"):
+            st.info("Watch Demo clicked")
+    
+
+
     if uploaded_files:
-        if st.button("✨ Extract Intelligence", use_container_width=True, type="primary"):
+        if st.button("✨ Extract Intelligence", use_container_width=True):
             with st.spinner("Analyzing..."):
                 transcripts = load_transcripts(uploaded_files)
                 for name, content in transcripts.items():
@@ -130,33 +142,107 @@ else:
     # THE DASHBOARD (DATA STATE)
     st.markdown('<h1 class="text-3xl font-bold mb-1 text-white">Intelligence Dashboard</h1>', unsafe_allow_html=True)
     
+        # --- 🔍 SEARCH / FILTER FEATURE ---
+    st.markdown("### 🔍 Search Meetings")
+
+    search_query = st.text_input("Search decisions or action items")
+
+    if search_query:
+        filtered_meetings = {}
+        for name, data in st.session_state.all_meetings.items():
+
+            decisions = [d for d in data["analysis"]["decisions"] if search_query.lower() in d.lower()]
+            actions = [a for a in data["analysis"]["action_items"] if search_query.lower() in a["what"].lower()]
+
+            if decisions or actions:
+                filtered_meetings[name] = {
+                    "analysis": {
+                        "decisions": decisions,
+                        "action_items": actions
+                    },
+                    "content": data["content"],
+                    "sentiment": data["sentiment"]
+                }
+
+        display_data = filtered_meetings
+    else:
+        display_data = st.session_state.all_meetings
+
+    for name, data in display_data.items():
+        st.markdown(f"### 📝 Summary — {name}")
+        st.write(data["analysis"]["summary"])
+
     m1, m2, m3 = st.columns(3)
-    m1.metric("Meetings", len(st.session_state.all_meetings))
-    m2.metric("Decisions", sum(len(m["analysis"]["decisions"]) for m in st.session_state.all_meetings.values()))
-    m3.metric("Action Items", sum(len(m["analysis"]["action_items"]) for m in st.session_state.all_meetings.values()))
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    m1.metric("Meetings", len(display_data))
+    m2.metric("Decisions", sum(len(m["analysis"]["decisions"]) for m in display_data.values()))
+    m3.metric("Action Items", sum(len(m["analysis"]["action_items"]) for m in display_data.values()))
+
 
     tab_dec, tab_act, tab_sent, tab_chat = st.tabs(["📌 Decisions", "📋 Action Items", "😊 Sentiment", "💬 Assistant"])
 
     with tab_dec:
-        st.markdown('<div class="custom-table-container">', unsafe_allow_html=True)
-        table_html = '<table class="custom-table"><thead><tr><th>Decision</th><th>Source</th></tr></thead><tbody>'
-        for name, data in st.session_state.all_meetings.items():
+        st.markdown('<div class="fade-in">', unsafe_allow_html=True)
+
+        for name, data in display_data.items():
             for d in data["analysis"]["decisions"]:
-                table_html += f'<tr><td>{d}</td><td class="text-[#94A3B8]">{name}</td></tr>'
-        table_html += '</tbody></table></div>'
-        st.markdown(table_html, unsafe_allow_html=True)
+
+                col1, col2 = st.columns([5,1])
+
+                with col1:
+                    st.markdown(f"""
+                    <div class="card fade-in">
+                        <div class="card-title">{d}</div>
+                        <div class="card-sub">{name}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col2:
+                    if st.button("Explain", key=f"{name}-{d}"):
+                        response = requests.post(
+                            f"{API_URL}/explain",
+                            json={
+                                "decision": d,
+                                "context": data["content"]
+                            }
+                        )
+                        explanation = response.json()["explanation"]
+                        st.info(explanation)
+
 
     with tab_act:
-        st.markdown('<div class="custom-table-container">', unsafe_allow_html=True)
-        table_html = '<table class="custom-table"><thead><tr><th>Who</th><th>What</th><th>Deadline</th></tr></thead><tbody>'
-        for name, data in st.session_state.all_meetings.items():
+        for name, data in display_data.items():
             for item in data["analysis"]["action_items"]:
-                table_html += f'<tr><td>{item["who"]}</td><td>{item["what"]}</td><td class="text-[#6366F1]">{item["by_when"]}</td></tr>'
-        table_html += '</tbody></table></div>'
-        st.markdown(table_html, unsafe_allow_html=True)
+
+                st.markdown(f"""
+                <div class="card fade-in">
+                    <div class="card-title">{item["what"]}</div>
+                    <div class="card-sub">
+                        👤 {item["who"]} | ⏳ {item["by_when"]} | 📁 {name}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # --- CSV DOWNLOAD ---
+        all_items = []
+        for name, data in display_data.items():
+            for item in data["analysis"]["action_items"]:
+                item_copy = item.copy()
+                item_copy["meeting"] = name
+                all_items.append(item_copy)
+
+        if all_items:
+            df = pd.DataFrame(all_items)
+            st.download_button(
+                "📥 Download Action Items (CSV)",
+                df.to_csv(index=False),
+                file_name="action_items.csv",
+                mime="text/csv"
+            )
 
     with tab_sent:
-        for name, data in st.session_state.all_meetings.items():
+        for name, data in display_data.items():
             st.write(f"**Participation for {name}**")
             df_sent = pd.DataFrame(list(data["sentiment"].items()), columns=["Speaker", "Sentiment"])
             fig = px.pie(df_sent, names="Speaker", hole=0.5)
@@ -186,3 +272,21 @@ else:
                 st.error(f"Chat connection error: {e}")
                 st.stop()
             st.markdown(f'<div style="background: #1A1A24; padding: 20px; border-radius: 10px; border-left: 5px solid #6366F1;">{ans}</div>', unsafe_allow_html=True)
+
+st.markdown("---")
+st.markdown("## 💬 Feedback")
+
+feedback = st.text_area("Share your thoughts")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    rating = st.slider("Rate the app", 1, 5, 4)
+
+with col2:
+    category = st.selectbox("Category", ["UI", "Bug", "Feature Request", "Other"])
+
+if st.button("Submit Feedback"):
+    with open("feedback.txt", "a") as f:
+        f.write(f"Rating: {rating}\nCategory: {category}\nFeedback: {feedback}\n---\n")
+    st.success("Thanks! 🚀")

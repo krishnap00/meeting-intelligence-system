@@ -29,16 +29,28 @@ def extract_decisions_actions(transcript_text):
     truncated_text = transcript_text[:15000]
     
     prompt = f"""
-    Analyze the meeting transcript and provide a structured report.
-    You MUST return ONLY a JSON object with this exact structure:
+    You are an expert meeting analyst.
+
+    Your task is to extract structured intelligence from the transcript.
+
+    STRICT RULES:
+    - Only include REAL decisions (not discussions)
+    - Action items MUST include a responsible person
+    - If no deadline is mentioned, use "TBD"
+    - Keep answers concise and clear
+    - Do NOT hallucinate
+
+    Return ONLY valid JSON in this exact format:
     {{
         "summary": "2-sentence executive summary.",
-        "decisions": ["Decision 1", "Decision 2"],
+        "decisions": ["Clear decision 1", "Clear decision 2"],
         "action_items": [
-            {{"who": "Name", "what": "Task", "by_when": "Deadline/TBD"}}
+            {{"who": "Person name", "what": "Specific task", "by_when": "Deadline or TBD"}}
         ]
     }}
-    Transcript: {truncated_text}
+
+    Transcript:
+    {truncated_text}
     """
     
     try:
@@ -69,14 +81,49 @@ def analyze_sentiment_real(transcript_text):
 def chatbot_response(user_question, combined_text):
     """Feature 2: Contextual query reasoning using high-parameter model."""
     prompt = f"""
-    You are an AI Meeting Assistant. Answer based ONLY on the context.
-    Cite the meeting or speaker.
+    You are an AI Meeting Assistant.
+
+    Rules:
+    - Answer ONLY using the provided context
+    - If answer not found, say "Not mentioned in the meetings"
+    - Always mention speaker or meeting context if possible
+    - Be concise and factual
+
     Question: {user_question}
-    Context: {combined_text[:20000]}
+
+    Context:
+    {combined_text[:20000]}
     """
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.1
     )
+    return response.choices[0].message.content
+
+def explain_decision(decision, transcript_text):
+    prompt = f"""
+    You are an AI meeting analyst.
+
+    A decision was extracted:
+    "{decision}"
+
+    Find the exact parts of the transcript that justify this decision.
+
+    Rules:
+    - Quote relevant lines from transcript
+    - Include speaker names if available
+    - Keep it short and precise
+    - Do NOT hallucinate
+
+    Transcript:
+    {transcript_text[:15000]}
+    """
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2
+    )
+
     return response.choices[0].message.content
