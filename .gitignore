@@ -205,3 +205,17 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+.env
+# --- Project specific (VERY IMPORTANT) ---
+frontend/credentials.json
+frontend/credentials.yaml
+
+# API keys
+.env
+
+# Streamlit cache
+.streamlit/
+
+# OS junk (just in case)
+Thumbs.db
+.DS_Store
